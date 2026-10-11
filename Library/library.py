@@ -1,5 +1,5 @@
 
-
+from datetime import datetime
 
 class Book:
 
@@ -42,3 +42,37 @@ class Book:
 
         return f"Book(isbn='{self.isbn}', title = '{self.title}')"
             
+
+class Member:
+
+    def __init__(self, Member_id:str, Name:str, Max_books: int = 5):
+        self.MemberID = Member_id
+        self.Name = Name
+        self.Max_books = Max_books
+        self._borrowed_books : dict[str, Book] = {}
+
+    @property
+    def borrowed_books(self):
+
+        return list[self._borrowed_books.values()]
+
+    def can_borrow(self):
+        return len(self._borrowed_books) < self.Max_books
+
+    def add_book(self, book: Book):
+
+        if self.can_borrow() and book.isbn not in self.borrowed_books():
+            self.borrowed_books[book.isbn] = book
+            return True
+        return False
+
+    def remove_book(self, isbn: str):
+        return self.borrowed_books.pop(isbn,None)
+
+    def __str__(self):
+
+        return f"Member : {self.name} (ID:{self.MemberID}) - Borrowed: {len(self.borrowed_books)}/{self.Max_books} "
+
+
+
+        

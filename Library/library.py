@@ -75,4 +75,17 @@ class Member:
 
 
 
-        
+class Transaction:
+    def __init__(self, member_id: str, isbn: str, action: str):
+        self.transaction_id = id(self)
+        self.member_id = member_id
+        self.isbn = isbn
+        self.action = action  # "BORROW" or "RETURN"
+        self.timestamp = datetime.now()
+
+    def __str__(self) -> str:
+        time_str = self.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+        return f"[{time_str}] Member {self.member_id} -> {self.action} -> Book {self.isbn}"
+
+    
+

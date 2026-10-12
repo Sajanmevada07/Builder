@@ -89,3 +89,74 @@ class Transaction:
 
     
 
+class Library:
+    def __init__(self, name: str):
+        self.name = name
+        self._books: dict[str, Book] = {}       # ISBN -> Book
+        self._members: dict[str, Member] = {}   # Member ID -> Member
+        self._transactions: list[Transaction] = []
+
+    # --- Management Methods ---
+    def add_book(self, book: Book) -> None:
+        self._books[book.isbn] = book
+        print(f"Added to library: {book.title}")
+
+    def register_member(self, member: Member) -> None:
+        self._members[member.member_id] = member
+        print(f"Registered member: {member.name}")
+
+    # --- Search Methods ---
+    def search_by_title(self, query: str) -> list[Book]:
+        return [b for b in self._books.values() if query.lower() in b.title.lower()]
+
+    def search_by_author(self, query: str) -> list[Book]:
+        return [b for b in self._books.values() if query.lower() in b.author.lower()]
+
+    # --- Loan Operations ---
+    def checkout_book(self, member_id: str, isbn: str) -> bool:
+        member = self._members.get(member_id)
+        book = self._books.get(isbn)
+
+        if not member:
+            print(f"Error: Member ID '{member_id}' not found.")
+            return False
+        if not book:
+            print(f"Error: Book ISBN '{isbn}' not found.")
+            return False
+        if book.is_borrowed:
+            print(f"Error: '{book.title}' is currently checked out.")
+            return False
+        if not member.can_borrow():
+            print(f"Error: {member.name} has reached borrowing limit ({member.max_books} books).")
+            return False
+
+        # Execute Transaction
+        book.mark_as_borrowed()
+        member.add_book(book)
+        tx = Transaction(member_id, isbn, "BORROW")
+        self._transactions.append(tx)
+        print(f"Success: '{book.title}' checked out to {member.name}.")
+        return True
+
+    def return_book(self, member_id: str, isbn: str) -> bool:
+        member = self._members.get(member_id)
+        book = self._books.get(isbn)
+
+        if not member or not book:
+            print("Error: Invalid member or ISBN.")
+            return False
+
+        if member.remove_book(isbn):
+            book.mark_as_returned()
+            tx = Transaction(member_id, isbn, "RETURN")
+            self._transactions.append(tx)
+            print(f"Success: '{book.title}' returned by {member.name}.")
+            return True
+
+        print(f"Error: {member.name} does not have book '{isbn}' checked out.")
+        return False
+
+    def list_transactions(self) -> None:
+        print(f"\n--- {self.name} Transaction Log ---")
+        for tx in self._transactions:
+            print(tx)

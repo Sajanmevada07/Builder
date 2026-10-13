@@ -38,3 +38,37 @@ The application is structured into four primary classes, each adhering to the **
 python library.py
 
 
+Expected Output 
+
+==================================================
+  LIBRARY MANAGEMENT SYSTEM - OOP DEMONSTRATION   
+==================================================
+
+--- Registering Catalog & Members ---
+Added to library: 'Clean Code'
+Added to library: 'The Pragmatic Programmer'
+Added to library: 'Head First Design Patterns'
+Registered member: Alice Vance
+
+--- Catalog Search ---
+Search Result: [978-0201616224] 'The Pragmatic Programmer' by Andrew Hunt (Available)
+
+--- Borrowing Workflows & Limit Checks ---
+Success: 'Clean Code' checked out to Alice Vance.
+Success: 'The Pragmatic Programmer' checked out to Alice Vance.
+Error: Alice Vance reached borrowing limit (2 max).
+
+--- Patron State Check ---
+Member: Alice Vance (ID: M001) - Borrowed: 2/2
+
+--- Return Workflow ---
+Success: 'Clean Code' returned by Alice Vance.
+Success: 'Head First Design Patterns' checked out to Alice Vance.
+
+--- Audit Log output ---
+
+--- City Central Library Transaction Log ---
+[2026-10-13 11:14:00] Member M001 -> BORROW -> Book 978-0135404676
+[2026-10-13 11:14:00] Member M001 -> BORROW -> Book 978-0201616224
+[2026-10-13 11:14:00] Member M001 -> RETURN -> Book 978-0135404676
+[2026-10-13 11:14:00] Member M001 -> BORROW -> Book 978-0596009205

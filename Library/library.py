@@ -1,77 +1,64 @@
 
 from datetime import datetime
+from typing import Optional
+
 
 class Book:
-
-    def __int__(self, isbn: str , title: str , author:str):
+    def __init__(self, isbn: str, title: str, author: str):
         self.isbn = isbn
         self.title = title
         self.author = author
         self._is_borrowed: bool = False
 
-
-        pass
-
     @property
-    def is_borrowed(self):
-
+    def is_borrowed(self) -> bool:
         return self._is_borrowed
 
-    def mark_as_borrowed(self):
-
+    def mark_as_borrowed(self) -> bool:
         if self._is_borrowed:
             return False
-
         self._is_borrowed = True
         return True
 
-    def mark_as_returned(self):
-
+    def mark_as_returned(self) -> bool:
         if not self._is_borrowed:
             return False
         self._is_borrowed = False
-        return True 
+        return True
 
-    def __str__(self):
-        status = "Borrowed" if self._is_borrowed  else "Available"
+    def __str__(self) -> str:
+        status = "Borrowed" if self._is_borrowed else "Available"
+        return f"[{self.isbn}] '{self.title}' by {self.author} ({status})"
 
-        return f"[{self.isbn}] '{self.title}' by '{self.author} ({status})'"
-
-
-    def __repr__(self):
-
-        return f"Book(isbn='{self.isbn}', title = '{self.title}')"
+    def __repr__(self) -> str:
+        return f"Book(isbn='{self.isbn}', title='{self.title}')"
             
 
 class Member:
-
-    def __init__(self, Member_id:str, Name:str, Max_books: int = 5):
-        self.MemberID = Member_id
-        self.Name = Name
-        self.Max_books = Max_books
-        self._borrowed_books : dict[str, Book] = {}
+    def __init__(self, member_id: str, name: str, max_books: int = 3):
+        self.member_id = member_id
+        self.name = name
+        self.max_books = max_books
+        self._borrowed_books: dict[str, Book] = {}  # ISBN -> Book mapping
 
     @property
-    def borrowed_books(self):
+    def borrowed_books(self) -> list[Book]:
+        return list(self._borrowed_books.values())
 
-        return list[self._borrowed_books.values()]
+    def can_borrow(self) -> bool:
+        return len(self._borrowed_books) < self.max_books
 
-    def can_borrow(self):
-        return len(self._borrowed_books) < self.Max_books
-
-    def add_book(self, book: Book):
-
-        if self.can_borrow() and book.isbn not in self.borrowed_books():
-            self.borrowed_books[book.isbn] = book
+    def add_book(self, book: Book) -> bool:
+        if self.can_borrow() and book.isbn not in self._borrowed_books:
+            self._borrowed_books[book.isbn] = book
             return True
         return False
 
-    def remove_book(self, isbn: str):
-        return self.borrowed_books.pop(isbn,None)
+    def remove_book(self, isbn: str) -> Optional[Book]:
+        return self._borrowed_books.pop(isbn, None)
 
-    def __str__(self):
-
-        return f"Member : {self.name} (ID:{self.MemberID}) - Borrowed: {len(self.borrowed_books)}/{self.Max_books} "
+    def __str__(self) -> str:
+        return f"Member: {self.name} (ID: {self.member_id}) - Borrowed: {len(self._borrowed_books)}/{self.max_books}"
 
 
 
@@ -160,3 +147,40 @@ class Library:
         print(f"\n--- {self.name} Transaction Log ---")
         for tx in self._transactions:
             print(tx)
+
+
+
+# Initialize Library
+city_library = Library("Central City Library")
+
+# Populate Books
+b1 = Book("978-0135404676", "Clean Code", "Robert C. Martin")
+b2 = Book("978-0201616224", "The Pragmatic Programmer", "Andrew Hunt")
+b3 = Book("978-0596009205", "Head First Design Patterns", "Eric Freeman")
+
+city_library.add_book(b1)
+city_library.add_book(b2)
+city_library.add_book(b3)
+
+# Register Member
+m1 = Member("M001", "Alice Vance", max_books=2)
+city_library.register_member(m1)
+
+print("\n--- Borrowing Operations ---")
+# Check out book 1
+city_library.checkout_book("M001", "978-0135404676")
+
+# Check out book 2
+city_library.checkout_book("M001", "978-0201616224")
+
+# Attempt to exceed borrowing limit (max_books = 2)
+city_library.checkout_book("M001", "978-0596009205")
+
+print("\n--- Member State ---")
+print(m1)
+
+print("\n--- Return Operations ---")
+city_library.return_book("M001", "978-0135404676")
+
+print("\n--- Final Audit Log ---")
+city_library.list_transactions()

@@ -53,3 +53,27 @@ class PhysicalProduct(Product):
             f"Package dispatched for '{self.name}' (Weight: {self.weight_kg}kg). "
             f"Remaining inventory: {self.stock_quantity} units."
         )
+
+
+# Subclass 2 : Digital_product
+
+class DigitalProduct(Product):
+    """
+    Represents downloadable goods with no shipping costs or inventory limits.
+    """
+
+    def __init__(self, product_id: str, name: str, base_price: float, file_size_mb: float, download_url: str):
+        super().__init__(product_id, name, base_price)
+        self.file_size_mb: float = file_size_mb
+        self.download_url: str = download_url
+
+    def calculate_total_price(self) -> float:
+        # Digital goods have zero shipping cost
+        return self.base_price
+
+    def fulfill(self) -> str:
+        return (
+            f"Generated single-use download link for '{self.name}' "
+            f"({self.file_size_mb} MB): {self.download_url}"
+        )
+

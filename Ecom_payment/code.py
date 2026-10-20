@@ -77,3 +77,42 @@ class DigitalProduct(Product):
             f"({self.file_size_mb} MB): {self.download_url}"
         )
 
+
+# Subclass 3 : Subscription_Product
+class SubscriptionProduct(Product):
+    """
+    Represents recurring software or access services with billing options.
+    """
+
+    def __init__(self, product_id: str, name: str, base_price: float, billing_cycle: str):
+        super().__init__(product_id, name, base_price)
+        self.billing_cycle: str = billing_cycle.lower()  # "monthly" or "annual"
+
+    def calculate_total_price(self) -> float:
+        # Apply a 15% discount for annual plans
+        if self.billing_cycle == "annual":
+            return self.base_price * 12 * 0.85
+        return self.base_price
+
+    def fulfill(self) -> str:
+        return (
+            f"Activated {self.billing_cycle.capitalize()} Subscription for '{self.name}'. "
+            f"Auto-renewal scheduled."
+        )
+
+
+# DEMONSTRATION & POLYMORPHISM CHECK
+
+if __name__ == "__main__":
+    # Create one instance of each product type
+    items: list[Product] = [
+        PhysicalProduct("P100", "Gaming Laptop", 1200.00, weight_kg=2.5, stock_quantity=10),
+        DigitalProduct("D200", "Python Mastering eBook", 29.99, file_size_mb=15.4, download_url="https://store.com/dl/python-ebook"),
+        SubscriptionProduct("S300", "Cloud Storage 1TB", 10.00, billing_cycle="annual"),
+    ]
+
+    print("--- DEMONSTRATING POLYMORPHISM ---")
+    for item in items:
+        print(f"\nItem: {item.name}")
+        print(f"Total Computed Price: ${item.calculate_total_price():.2f}")
+        print(f"Fulfillment Status:   {item.fulfill()}")

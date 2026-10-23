@@ -116,3 +116,78 @@ if __name__ == "__main__":
         print(f"\nItem: {item.name}")
         print(f"Total Computed Price: ${item.calculate_total_price():.2f}")
         print(f"Fulfillment Status:   {item.fulfill()}")
+
+
+
+# entity 2 : - Payment gateway    
+
+
+class PaymentGateway(ABC):
+    """
+    Abstract interface for payment processing.
+    Enforces a standard contract for all payment service providers.
+    """
+
+    @abstractmethod
+    def authorize(self, amount: float) -> bool:
+        """Verify funds or account validity before capturing payment."""
+        pass
+
+    @abstractmethod
+    def process_payment(self, amount: float) -> str:
+        """Capture the funds and return a transaction reference ID."""
+        pass
+
+    @abstractmethod
+    def refund(self, transaction_id: str, amount: float) -> bool:
+        """Reverse a completed transaction."""
+        pass
+
+
+
+class CreditCardGateway(PaymentGateway):
+    """
+    Handles secure credit card transactions via third-party bank APIs.
+    """
+
+    def __init__(self, card_number: str, cvv: str):
+        # Mask card number for security logging
+        self.masked_card: str = f"****-****-****-{card_number[-4:]}"
+        self.cvv: str = cvv
+
+    def authorize(self, amount: float) -> bool:
+        print(f"[CreditCard] Authorizing ${amount:.2f} on card {self.masked_card}...")
+        # Mock validation check
+        return len(self.cvv) == 3
+
+    def process_payment(self, amount: float) -> str:
+        print(f"[CreditCard] Processing payment of ${amount:.2f}...")
+        # Returns a mock transaction reference ID
+        return "CC_TXN_987654321"
+
+    def refund(self, transaction_id: str, amount: float) -> bool:
+        print(f"[CreditCard] Refunding ${amount:.2f} for transaction {transaction_id}...")
+        return True
+
+
+
+class PayPalGateway(PaymentGateway):
+    """
+    Handles transactions via PayPal API tokens and user emails.
+    """
+
+    def __init__(self, paypal_email: str):
+        self.paypal_email: str = paypal_email
+
+    def authorize(self, amount: float) -> bool:
+        print(f"[PayPal] Verifying account {self.paypal_email} for ${amount:.2f}...")
+        return "@" in self.paypal_email
+
+    def process_payment(self, amount: float) -> str:
+        print(f"[PayPal] Executing instant transfer of ${amount:.2f} from {self.paypal_email}...")
+        return "PP_TXN_123456789"
+
+    def refund(self, transaction_id: str, amount: float) -> bool:
+        print(f"[PayPal] Issuing refund of ${amount:.2f} to {self.paypal_email}...")
+        return True
+

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Dict
 
 
 #Base Class
@@ -191,3 +192,72 @@ class PayPalGateway(PaymentGateway):
         print(f"[PayPal] Issuing refund of ${amount:.2f} to {self.paypal_email}...")
         return True
 
+
+# entity 3 :- Customer and Shopping Cart
+
+
+
+
+class Customer:
+    """
+    Represents a registered buyer in the e-commerce system.
+    """
+
+    def __init__(self, customer_id: str, name: str, email: str):
+        self.customer_id: str = customer_id
+        self.name: str = name
+        self.email: str = email
+
+    def __str__(self) -> str:
+        return f"Customer: {self.name} ({self.email})"
+
+
+
+class Cart:
+    """
+    Manages a temporary collection of products selected by a customer prior to checkout.
+    """
+
+    def __init__(self, customer: Customer):
+        self.customer: Customer = customer
+        # Maps product_id to a dictionary containing the product object and its quantity
+        self._items: Dict[str, dict] = {}
+
+    def add_item(self, product: Product, quantity: int = 1) -> None:
+        """Adds a product to the cart or increases quantity if already present."""
+        if product.product_id in self._items:
+            self._items[product.product_id]["quantity"] += quantity
+        else:
+            self._items[product.product_id] = {
+                "product": product,
+                "quantity": quantity
+            }
+        print(f"Added {quantity}x '{product.name}' to {self.customer.name}'s cart.")
+
+    def remove_item(self, product_id: str) -> None:
+        """Removes a product completely from the cart."""
+        if product_id in self._items:
+            removed = self._items.pop(product_id)
+            print(f"Removed '{removed['product'].name}' from cart.")
+        else:
+            print("Product ID not found in cart.")
+
+    def get_subtotal(self) -> float:
+        """Calculates total cost of all items in the cart (including category fees)."""
+        subtotal = 0.0
+        for item_data in self._items.values():
+            product: Product = item_data["product"]
+            qty: int = item_data["quantity"]
+            subtotal += product.calculate_total_price() * qty
+        return subtotal
+
+    def get_items_summary(self) -> list[dict]:
+        """Returns a list of items currently in the cart."""
+        return list(self._items.values())
+
+    def clear(self) -> None:
+        """Empties the cart after checkout."""
+        self._items.clear()
+
+    def __str__(self) -> str:
+        return f"Cart for {self.customer.name}: {len(self._items)} unique items, Subtotal: ${self.get_subtotal():.2f}"
